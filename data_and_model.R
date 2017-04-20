@@ -101,6 +101,7 @@ testLabel <-  test$label;
 train$label <- NULL
 test$label <- NULL
 
+library("xgboost")
 
 dval = xgb.DMatrix(data=data.matrix(test),label=testLabel, missing = NaN);
 dtrain = xgb.DMatrix(data=data.matrix(train),label=trainLabel,missing = NaN);
