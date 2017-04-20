@@ -97,3 +97,6 @@ ROC(test=data$pred,stat= data$label,plot = "ROC")
 
 ttt<- data[,.(pred,label)][order(pred,decreasing = T)]
 plot(ttt$pred)
+ttt$predlab<- ifelse(ttt$pred>=succes,1,0)
+(table(ttt$predlab,ttt$label)[1,1]+table(ttt$predlab,ttt$label)[2,2])/
+sum(table(ttt$predlab,ttt$label))
