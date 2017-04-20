@@ -55,13 +55,13 @@ length(which(uniq%in%shivie))
 pokupki<- pokupki[
   `Дата покупки`>="2016-04-01" & `Дата покупки`<"2017-02-01" & `Телефон` %in% uniq
   ,.(
-  sum_pokup=sum(`Сумма покупки`,na.rm = T),
-  sum_oplay=sum(`Сумма оплаты`,na.rm = T),
-  sum_nach=sum(`Начислено`,na.rm = T),
-  sum_spisan=sum(`Списано`,na.rm = T)
-
-  
-)
+    sum_pokup=sum(`Сумма покупки`,na.rm = T),
+    sum_oplay=sum(`Сумма оплаты`,na.rm = T),
+    sum_nach=sum(`Начислено`,na.rm = T),
+    sum_spisan=sum(`Списано`,na.rm = T)
+    
+    
+  )
   ,by=.(`pust`,`Телефон`,`Группа покупателя`,`Точка продаж`)]
 
 
@@ -101,6 +101,7 @@ testLabel <-  test$label;
 train$label <- NULL
 test$label <- NULL
 
+
 library("xgboost")
 
 dval = xgb.DMatrix(data=data.matrix(test),label=testLabel, missing = NaN);
@@ -138,11 +139,23 @@ library(Epi)
 which.max(clf2$evaluation_log$val_auc)
 ROC(test=predict(clf2,data.matrix(test),ntreelimit = which.max(clf2$evaluation_log$val_auc)),stat= testLabel,plot = "ROC")
 
+testa=predict(clf2,data.matrix(test),ntreelimit = which.max(clf2$evaluation_log$val_auc))
+testa<- as.data.table(testa)
+testa$stat= testLabel
+
+ttt<- testa[,.(testa,stat)][order(testa,decreasing = T)]
+names(ttt)[1] <- "pred"
+names(ttt)[2] <- "label"
+
+# SUCCES RATE
 
 
+succes<- matrix(0,ncol = 2)
+for( i in 1:(length(unique(ttt$pred))-1)){
 
-
-
-
-
-
+  tab <- table(ifelse(ttt$pred>=unique(ttt$pred)[i],1,0),ttt$label)
+  succes<- rbind(succes,matrix(c((tab[1,1]+tab[2,2])/sum(tab),i),ncol=2))
+  
+    
+}
+succes <- unique(ttt$pred)[which.max(succes[,1])]
